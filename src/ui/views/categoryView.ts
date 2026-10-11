@@ -34,7 +34,7 @@ export function renderCategoryView(state: AppState): void {
       const color = palette[i % palette.length] || "#8b5cf6";
       return `
       <li>
-        <span class="swatch" style="background:${color}" aria-hidden="true"></span>
+        <span class="swatch" style="--c:${color}; background:${color}" aria-hidden="true"></span>
         <span class="name"><span aria-hidden="true">${icon}</span> ${k}</span>
         <span class="num">₹${inrPlain(v)}</span>
       </li>`;

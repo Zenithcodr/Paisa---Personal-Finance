@@ -43,10 +43,10 @@ export function renderGoals(state: AppState, d: DerivedMetrics): void {
       return `
         <div class="goal">
           <h4>${escapeHtml(g.label)}</h4>
-          <div class="progress" role="progressbar" aria-valuenow="${Math.round(pct)}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pct}%"></i></div>
+          <div class="progress" role="progressbar" aria-valuenow="${Math.round(pct)}" aria-valuemin="0" aria-valuemax="100"><i style="--w:${pct}%; width:${pct}%"></i></div>
           <div class="meta"><span>₹${inrPlain(g.saved)} / ₹${inrPlain(g.target)}</span><span>Day ${g.targetDay}</span></div>
           <div class="eta ${tone}">${need}</div>
-          <div class="actions-cell" style="display:flex;gap:6px;">
+          <div class="actions-cell">
             <button class="icon-btn" data-contrib="${g.id}" aria-label="Contribute 100 rupees to ${escapeHtml(g.label)}">+ ₹100</button>
             <button class="icon-btn" data-contrib-big="${g.id}" aria-label="Contribute 500 rupees to ${escapeHtml(g.label)}">+ ₹500</button>
             <button class="icon-btn danger" data-rm-g="${g.id}" aria-label="Delete goal ${escapeHtml(g.label)}">Delete</button>

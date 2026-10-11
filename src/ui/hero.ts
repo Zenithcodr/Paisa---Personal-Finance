@@ -56,6 +56,7 @@ export function renderHero(state: AppState, d: DerivedMetrics): void {
 
   if (balanceBar) {
     const balPct = Math.max(0, Math.min(100, (d.balance / state.budget) * 100));
+    balanceBar.style.setProperty("--w", balPct + "%");
     balanceBar.style.width = balPct + "%";
   }
 
@@ -97,7 +98,7 @@ export function renderHero(state: AppState, d: DerivedMetrics): void {
       .sort((a, b) => b.contribution - a.contribution)
       .map(
         (f) =>
-          `<li class="factor"><span class="name">${f.name}</span><span class="mini"><i style="width:${Math.round(f.value * 100)}%"></i></span><span class="val">+${Math.round(f.contribution)}</span></li>`
+          `<li class="factor"><span class="name">${f.name}</span><span class="mini"><i style="--w:${Math.round(f.value * 100)}%; width:${Math.round(f.value * 100)}%"></i></span><span class="val">+${Math.round(f.contribution)}</span></li>`
       )
       .join("");
   }
@@ -116,7 +117,7 @@ export function renderHero(state: AppState, d: DerivedMetrics): void {
     healthFactors.innerHTML = d.healthFactors
       .map(
         (f) =>
-          `<li class="factor"><span class="name">${f.name}</span><span class="mini"><i style="width:${Math.round(f.value * 100)}%"></i></span><span class="val">${Math.round(f.value * 100)}%</span></li>`
+          `<li class="factor"><span class="name">${f.name}</span><span class="mini"><i style="--w:${Math.round(f.value * 100)}%; width:${Math.round(f.value * 100)}%"></i></span><span class="val">${Math.round(f.value * 100)}%</span></li>`
       )
       .join("");
   }

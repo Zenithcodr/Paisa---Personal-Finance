@@ -206,7 +206,7 @@
 }
 .bar-fill {
   height: 100%;
-  width: 0%;
+  width: var(--w, 0%);
   background: var(--grad-2);
   border-radius: inherit;
   transition:
@@ -296,7 +296,7 @@
 .factor .mini > i {
   display: block;
   height: 100%;
-  width: 0%;
+  width: var(--w, 0%);
   background: var(--grad-2);
   border-radius: inherit;
   transition: width var(--duration) ease-out;
@@ -693,6 +693,7 @@ input:focus {
   height: 10px;
   border-radius: 3px;
   flex: 0 0 auto;
+  background: var(--c, currentColor);
 }
 .legend-list .name {
   flex: 1 1 auto;
@@ -738,6 +739,7 @@ input:focus {
 .goal .progress > i {
   display: block;
   height: 100%;
+  width: var(--w, 0%);
   background: var(--grad-1);
   border-radius: inherit;
   transition: width var(--duration);
