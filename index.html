@@ -100,7 +100,7 @@
             <span class="kicker">Risk</span>
             <span class="badge" id="riskBand">Low</span>
           </header>
-          <div class="gauge" id="riskGauge" role="img" aria-label="Risk gauge"></div>
+          <canvas class="gauge" id="riskGauge" width="180" height="110" role="img" aria-label="Risk gauge"></canvas>
           <ul class="factor-list" id="riskFactors"></ul>
         </article>
 
@@ -351,7 +351,7 @@
   <!-- MODAL -->
   <div class="modal-backdrop" id="modalBackdrop" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <header><h3 id="modalTitle">Title</h3></header>
+      <header><h3 id="modalTitle"></h3></header>
       <div class="modal-body" id="modalBody"></div>
       <footer class="modal-actions">
         <button class="btn ghost" id="modalCancelBtn" type="button">Cancel</button>

@@ -330,6 +330,8 @@ select:focus, input:focus { border-color: var(--violet-2); }
 }
 
 /* MODAL */
+[hidden] { display: none !important; }
+.modal-backdrop[hidden], .field[hidden], .sim-projection[hidden] { display: none !important; }
 .modal-backdrop {
   position: fixed; inset: 0; z-index: 70;
   background: rgba(7, 6, 15, 0.7);

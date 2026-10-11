@@ -222,9 +222,21 @@ export function drawCategory(canvas, data) {
   ctx.fillText("total spent", cx, cy + 16);
 }
 
-export function drawGauge(canvas, value) {
-  // simple semicircle gauge
-  const ctx = canvas.getContext("2d");
+export function drawGauge(el, value) {
+  if (!el) return;
+  let canvas = el;
+  if (el.tagName !== "CANVAS") {
+    let child = el.querySelector("canvas");
+    if (!child) {
+      child = document.createElement("canvas");
+      child.width = el.clientWidth || 180;
+      child.height = el.clientHeight || 110;
+      el.appendChild(child);
+    }
+    canvas = child;
+  }
+  const ctx = canvas.getContext ? canvas.getContext("2d") : null;
+  if (!ctx) return;
   const w = canvas.width, h = canvas.height;
   ctx.clearRect(0, 0, w, h);
   const cx = w / 2, cy = h * 0.95;

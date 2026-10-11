@@ -199,7 +199,7 @@ export function applyRecurringForDay(s, d) {
     if (r.startDay > d) continue;
     const period = r.cadence === "weekly" ? 7 : 30;
     for (let n = r.startDay; n <= d; n += period) {
-      const k = `${logKey}_${r.id}_${n}`;
+      const k = `${r.id}_day_${n}`;
       if (s.appliedLog.incomeOneTimeById[k]) continue;
       s.appliedLog.incomeOneTimeById[k] = true;
       s.transactions.push({

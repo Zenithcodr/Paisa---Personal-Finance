@@ -36,10 +36,27 @@ function toast(message, tone = "") {
   setTimeout(() => { el.remove(); }, 3500);
 }
 
-function openModal({ title, body, confirmLabel = "Confirm", onConfirm }) {
+let currentModalClose = null;
+
+function closeModal() {
+  if (currentModalClose) {
+    const fn = currentModalClose;
+    currentModalClose = null;
+    fn();
+  }
+}
+
+function openModal({ title, body, confirmLabel = "Confirm", cancelLabel = "Cancel", onConfirm, onCancel }) {
+  if (currentModalClose) {
+    const prev = currentModalClose;
+    currentModalClose = null;
+    prev();
+  }
+
   modalTitle.textContent = title;
   modalBody.innerHTML = body;
   modalConfirmBtn.textContent = confirmLabel;
+  modalCancelBtn.textContent = cancelLabel;
   modalBackdrop.hidden = false;
 
   const previouslyFocused = document.activeElement;
@@ -55,6 +72,11 @@ function openModal({ title, body, confirmLabel = "Confirm", onConfirm }) {
 
   const onKey = (e) => {
     if (e.key === "Escape") { e.preventDefault(); close(); return; }
+    if (e.key === "Enter" && e.target && e.target.tagName !== "TEXTAREA" && e.target.tagName !== "BUTTON") {
+      e.preventDefault();
+      modalConfirmBtn.click();
+      return;
+    }
     if (e.key !== "Tab") return;
     const f = getFocusable();
     if (f.length === 0) { e.preventDefault(); return; }
@@ -65,18 +87,33 @@ function openModal({ title, body, confirmLabel = "Confirm", onConfirm }) {
   document.addEventListener("keydown", onKey);
 
   const close = () => {
+    document.removeEventListener("keydown", onKey);
     modalBackdrop.hidden = true;
     modalConfirmBtn.onclick = null;
     modalCancelBtn.onclick = null;
-    document.removeEventListener("keydown", onKey);
+    modalTitle.textContent = "";
+    modalBody.innerHTML = "";
+    if (currentModalClose === close) currentModalClose = null;
     if (previouslyFocused && typeof previouslyFocused.focus === "function") {
-      previouslyFocused.focus();
+      try { previouslyFocused.focus(); } catch {}
     }
   };
-  modalCancelBtn.onclick = close;
-  modalConfirmBtn.onclick = () => { onConfirm(); close(); };
+
+  currentModalClose = close;
+
+  modalCancelBtn.onclick = () => {
+    if (onCancel) onCancel();
+    close();
+  };
+  modalConfirmBtn.onclick = () => {
+    if (onConfirm) {
+      const res = onConfirm();
+      if (res === false) return;
+    }
+    close();
+  };
 }
-modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) { modalBackdrop.hidden = true; modalConfirmBtn.onclick = null; modalCancelBtn.onclick = null; } });
+modalBackdrop.addEventListener("click", (e) => { if (e.target === modalBackdrop) closeModal(); });
 
 // ----------------------------- EVENT WIRING -----------------------------
 document.getElementById("resetBtn").onclick = () => {
@@ -226,7 +263,7 @@ function runSimulation() {
     const req = goal.requiredPerDay;
     if (!Number.isFinite(req) || req <= 0) return "now";
     const daysNeeded = Math.ceil(goal.remaining / Math.max(1, req));
-    const etaDay = Math.min(30, state.day + daysNeeded);
+    const etaDay = Math.min(30, current.day + daysNeeded);
     return "Day " + etaDay;
   };
   const currentGoalsTxt = currentDerived.goalProjections.length
@@ -325,10 +362,11 @@ function openExpenseModal() {
     confirmLabel: "Log",
     onConfirm: () => {
       const amount = Number(document.getElementById("m_amount").value);
-      if (!(amount > 0)) { toast("Enter a positive amount", "warn"); return; }
+      if (!(amount > 0)) { toast("Enter a positive amount", "warn"); return false; }
       const cat = document.getElementById("m_cat").value;
       const note = document.getElementById("m_note").value;
       addExpense({ day: getState().day, amount, category: cat, note });
+      toast("Expense logged.");
     }
   });
 }
@@ -344,7 +382,7 @@ function openUnexpectedModal() {
     onConfirm: () => {
       const amount = Number(document.getElementById("u_amount").value);
       const label = document.getElementById("u_label").value || "Unexpected";
-      if (!(amount > 0)) { toast("Enter a positive amount", "warn"); return; }
+      if (!(amount > 0)) { toast("Enter a positive amount", "warn"); return false; }
       // show impact first
       const current = getState();
       const projected = projectState(current, s => {
@@ -360,8 +398,12 @@ function openUnexpectedModal() {
                <p>Risk: <strong>${cur.riskScore}</strong> → <strong>${proj.riskScore}</strong>. Health: <strong>${cur.grade}</strong> → <strong>${proj.grade}</strong>.</p>
                <p>Confirm to add to your 30-day journey.</p>`,
         confirmLabel: "Confirm & add",
-        onConfirm: () => addUnexpected({ label, amount, day: getState().day })
+        onConfirm: () => {
+          addUnexpected({ label, amount, day: getState().day });
+          toast("Unexpected expense added.");
+        }
       });
+      return false;
     }
   });
 }
@@ -376,8 +418,9 @@ function openIncomeModal() {
     onConfirm: () => {
       const amount = Number(document.getElementById("i_amount").value);
       const label = document.getElementById("i_label").value || "Income";
-      if (!(amount > 0)) { toast("Enter a positive amount", "warn"); return; }
+      if (!(amount > 0)) { toast("Enter a positive amount", "warn"); return false; }
       addIncomeOneTime({ day: getState().day, amount, label });
+      toast("Income added.");
     }
   });
 }
@@ -398,8 +441,9 @@ function openSubModal() {
       const amount = Number(document.getElementById("s_amount").value);
       const cycle = document.getElementById("s_cycle").value;
       const renewalDay = Number(document.getElementById("s_day").value) || getState().day + 30;
-      if (!(amount > 0)) { toast("Enter a positive amount", "warn"); return; }
+      if (!(amount > 0)) { toast("Enter a positive amount", "warn"); return false; }
       addSubscription({ name, amount, cycle, renewalDay });
+      toast("Subscription added.");
     }
   });
 }
@@ -418,8 +462,9 @@ function openCommitModal() {
       const amount = Number(document.getElementById("c_amount").value);
       const frequency = document.getElementById("c_freq").value;
       const nextDueDay = Number(document.getElementById("c_due").value) || getState().day;
-      if (!(amount > 0)) { toast("Enter a positive amount", "warn"); return; }
+      if (!(amount > 0)) { toast("Enter a positive amount", "warn"); return false; }
       addCommitment({ label, amount, frequency, nextDueDay });
+      toast("Commitment added.");
     }
   });
 }
@@ -438,8 +483,9 @@ function openRecurringIncomeModal() {
       const amount = Number(document.getElementById("r_amount").value);
       const cadence = document.getElementById("r_freq").value;
       const startDay = Number(document.getElementById("r_day").value) || getState().day;
-      if (!(amount > 0)) { toast("Enter a positive amount", "warn"); return; }
+      if (!(amount > 0)) { toast("Enter a positive amount", "warn"); return false; }
       addRecurringIncome({ label, amount, cadence, startDay });
+      toast("Recurring income added.");
     }
   });
 }
@@ -456,8 +502,9 @@ function openGoalModal() {
       const label = document.getElementById("g_label").value || "Goal";
       const target = Number(document.getElementById("g_target").value);
       const targetDay = Number(document.getElementById("g_day").value) || 30;
-      if (!(target > 0)) { toast("Enter a positive target", "warn"); return; }
+      if (!(target > 0)) { toast("Enter a positive target", "warn"); return false; }
       addGoal({ label, target, targetDay });
+      toast("Savings goal added.");
     }
   });
 }
@@ -474,8 +521,9 @@ function openLoanModal() {
       const label = document.getElementById("d_label").value || "Loan";
       const amount = Number(document.getElementById("d_amount").value);
       const apr = Number(document.getElementById("d_apr").value);
-      if (!(amount > 0)) { toast("Enter a positive amount", "warn"); return; }
+      if (!(amount > 0)) { toast("Enter a positive amount", "warn"); return false; }
       takeLoan({ label, amount, apr, repayPerDay: Math.max(1, Math.round(amount / 30)) });
+      toast("Loan added.");
     }
   });
 }
@@ -768,6 +816,7 @@ function render() {
         </ul>
         <p class="muted small">You can keep this state or start over with a fresh ₹10,000 budget.</p>`,
       confirmLabel: "Reset journey",
+      cancelLabel: "Keep & continue",
       onConfirm: () => {
         resetJourney(makeInitialState);
         window._paisaDay30ShownForDay = null;
