@@ -15,3 +15,7 @@ Thumbs.db
 # Dependencies & build outputs
 node_modules/
 dist/
+
+# reference projects (not part of submission)
+*.zip
+
