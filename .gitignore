@@ -12,5 +12,6 @@ Thumbs.db
 .env
 .env.*
 
-# Dependencies (none required — this is a dependency-free static app)
+# Dependencies & build outputs
 node_modules/
+dist/
