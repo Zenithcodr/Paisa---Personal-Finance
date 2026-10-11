@@ -146,3 +146,13 @@ test("Day Rollover Applies Recurring Commitments", () => {
   expect(txAfter).toBeGreaterThan(txBefore);
   expect(getState().day).toBe(30);
 });
+
+test("Adding Income Never Lowers Health", () => {
+  init(makeInitialState());
+  const before = selectDerived(getState());
+  addIncomeOneTime({ day: 1, amount: 5000, label: "Freelance" });
+  const after = selectDerived(getState());
+  // Receiving money must not make financial health worse.
+  expect(after.healthScore).toBeGreaterThanOrEqual(before.healthScore);
+  expect(after.balance).toBe(before.balance + 5000);
+});

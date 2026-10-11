@@ -50,8 +50,11 @@ export function selectDerived(state: AppState): DerivedMetrics {
   // Buffer shortfall: ideal buffer = 10% of budget
   const bufferShortfall = clamp(safeDiv(Math.max(0, 1000 - balance), 1000), 0, 1);
 
-  // Savings rate
-  const savingsRate = clamp(safeDiv(saved, Math.max(1, incomeSoFar + state.budget)), 0, 1);
+  // Savings rate = share of total money-in (budget + income) you've retained,
+  // i.e. (inflows - spending) / inflows. Receiving income lifts balance and
+  // inflows together, so it never drags this down; only spending does.
+  const totalInflows = incomeSoFar + state.budget;
+  const savingsRate = clamp(safeDiv(balance, Math.max(1, totalInflows)), 0, 1);
 
   // Subs discipline
   const subscriptionDiscipline = 1 - subBurden;
@@ -170,10 +173,7 @@ export function selectDerived(state: AppState): DerivedMetrics {
 
   // Health 0-100
   const hWeights = { savings: 0.3, sub: 0.2, commit: 0.2, forecast: 0.2, goals: 0.1 };
-  const savingsScore =
-    state.day === 1 && state.income.recurring.length === 0 && state.income.oneTime.length === 0
-      ? 1
-      : 0.4 + 0.6 * savingsRate;
+  const savingsScore = savingsRate;
   const goalsScore = state.goals.length === 0 ? 1 : 0.5 + 0.5 * goalProgress;
   const isNeutralForecast =
     state.day === 1 &&
