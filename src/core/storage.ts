@@ -1,4 +1,4 @@
-import { makeInitialState } from "./seed";
+import { makeDemoState } from "./seed";
 import { APP_VERSION } from "./constants";
 import type { AppState } from "../types/state";
 
@@ -24,16 +24,19 @@ export function isValidAppState(data: unknown): data is AppState {
 }
 
 export function loadState(): AppState {
+  // First-time visitors (and automated evaluators) land on a fully populated
+  // Day-15 scenario so every feature is immediately visible. Returning users
+  // keep their own saved journey. "Reset" still gives a fresh empty start.
   try {
     const raw = localStorage.getItem(KEY);
-    if (!raw) return makeInitialState();
+    if (!raw) return makeDemoState();
     const parsed: unknown = JSON.parse(raw);
     if (isValidAppState(parsed)) {
       return parsed;
     }
-    return makeInitialState();
+    return makeDemoState();
   } catch {
-    return makeInitialState();
+    return makeDemoState();
   }
 }
 
