@@ -4,6 +4,14 @@ import { isValidAppState } from "../src/core/storage";
 import { selectDerived } from "../src/core/selectors";
 import { verdict } from "../src/core/verdict";
 import { escapeHtml, clamp, safeDiv } from "../src/core/constants";
+import {
+  init,
+  getState,
+  addExpense,
+  addIncomeOneTime,
+  advanceDay,
+  projectState
+} from "../src/core/store";
 import type { AppState } from "../src/types/state";
 
 test("Core Constants & Sanitization", () => {
@@ -84,4 +92,57 @@ test("Simulator Decision Verdict Engine", () => {
   const brokenDerived = selectDerived(brokenState);
   const vBroken = verdict(cur, brokenDerived);
   expect(vBroken.label).toBe("avoid");
+});
+
+test("Fresh Start Invariants", () => {
+  const d = selectDerived(makeInitialState());
+  expect(d.balance).toBe(10000);
+  expect(Math.round(d.dailyAllowance)).toBe(333);
+  expect(d.spent).toBe(0);
+  expect(d.riskBand).toBe("low");
+  expect(["A+", "A"]).toContain(d.grade);
+});
+
+test("Store Actions Update Reactive Balance", () => {
+  init(makeInitialState());
+  addExpense({ day: 1, amount: 350, category: "Food", note: "Lunch" });
+  const d = selectDerived(getState());
+  expect(d.spent).toBe(350);
+  expect(d.balance).toBe(9650);
+
+  addIncomeOneTime({ day: 1, amount: 1000, label: "Gift" });
+  const d2 = selectDerived(getState());
+  expect(d2.balance).toBe(10650);
+});
+
+test("Simulator Projection Never Mutates Saved State", () => {
+  init(makeInitialState());
+  const before = structuredClone(getState());
+  const projected = projectState(getState(), (s) => {
+    s.transactions.push({
+      id: "sim",
+      day: s.day,
+      amount: 5000,
+      category: "Shopping",
+      note: "Simulated",
+      ts: Date.now(),
+      source: "manual"
+    });
+  });
+  // Projection reflects the change...
+  expect(selectDerived(projected).balance).toBe(5000);
+  // ...but the real store is untouched.
+  expect(getState().transactions.length).toBe(before.transactions.length);
+  expect(selectDerived(getState()).balance).toBe(10000);
+});
+
+test("Day Rollover Applies Recurring Commitments", () => {
+  const demo = makeDemoState();
+  init(demo);
+  const txBefore = getState().transactions.length;
+  advanceDay(30);
+  const txAfter = getState().transactions.length;
+  // Advancing to Day 30 should auto-apply commitments/subscriptions/income.
+  expect(txAfter).toBeGreaterThan(txBefore);
+  expect(getState().day).toBe(30);
 });
