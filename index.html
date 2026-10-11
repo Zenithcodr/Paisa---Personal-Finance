@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0a1a" />
+  <title>Paisa — 30-day money coach</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/tokens.css" />
+  <link rel="stylesheet" href="styles/layout.css" />
+  <link rel="stylesheet" href="styles/components.css" />
+</head>
+<body>
+  <div class="bg-aurora" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">₹</span>
+      <div class="brand-text">
+        <span class="brand-name">Paisa</span>
+        <span class="brand-sub">your 30-day money coach</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <span class="day-pill" id="dayPill" aria-label="Current day">Day 1 / 30</span>
+      <button class="btn ghost" id="loadDemoBtn" type="button" title="Load a realistic Day 15 scenario">Load demo</button>
+      <button class="btn ghost danger" id="resetBtn" type="button" title="Reset your 30-day journey">Reset</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="rail">
+      <nav class="rail-nav" aria-label="Sections">
+        <a href="#hero" class="rail-link active" data-jump="hero">Overview</a>
+        <a href="#simulator" class="rail-link" data-jump="simulator">Simulate</a>
+        <a href="#transactions" class="rail-link" data-jump="transactions">Transactions</a>
+        <a href="#subscriptions" class="rail-link" data-jump="subscriptions">Subscriptions</a>
+        <a href="#commitments" class="rail-link" data-jump="commitments">Commitments</a>
+        <a href="#income" class="rail-link" data-jump="income">Income</a>
+        <a href="#goals" class="rail-link" data-jump="goals">Goals</a>
+        <a href="#debts" class="rail-link" data-jump="debts">Debts</a>
+        <a href="#forecast" class="rail-link" data-jump="forecast">Forecast</a>
+        <a href="#insights" class="rail-link" data-jump="insights">Coaching</a>
+      </nav>
+      <div class="rail-help">
+        <p>Every action you take updates <strong>all</strong> metrics in one cycle — balance, allowance, risk, health, forecast.</p>
+      </div>
+    </aside>
+
+    <section class="content">
+      <!-- HERO -->
+      <section class="grid-hero" id="hero">
+        <article class="card hero-card" aria-label="Balance">
+          <div class="hero-top">
+            <span class="kicker">Remaining balance</span>
+            <span class="badge tone-balance" id="balanceBand">In the green</span>
+          </div>
+          <div class="hero-amount">
+            <span class="currency">₹</span>
+            <span class="num" id="balanceNum">0</span>
+          </div>
+          <div class="hero-meta">
+            <div class="meta-item">
+              <span class="meta-label">of ₹10,000 budget</span>
+              <div class="bar"><div class="bar-fill" id="balanceBar"></div></div>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Daily allowance</span>
+              <span class="meta-value"><span class="currency">₹</span><span id="allowanceNum">0</span><span class="muted">/day</span></span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Buffer (rolled over)</span>
+              <span class="meta-value"><span class="currency">₹</span><span id="bufferNum">0</span></span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Spent so far</span>
+              <span class="meta-value"><span class="currency">₹</span><span id="spentNum">0</span></span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Days left</span>
+              <span class="meta-value"><span id="daysLeftNum">30</span></span>
+            </div>
+          </div>
+          <div class="hero-actions">
+            <button class="btn primary" id="addExpenseBtn" type="button">+ Log expense</button>
+            <button class="btn" id="addUnexpectedBtn" type="button">! Unexpected</button>
+            <button class="btn" id="addIncomeBtn" type="button">+ Income</button>
+            <button class="btn ghost" id="advanceDayBtn" type="button">Advance to next day</button>
+          </div>
+        </article>
+
+        <article class="card risk-card" aria-label="Financial risk">
+          <header class="card-head">
+            <span class="kicker">Risk</span>
+            <span class="badge" id="riskBand">Low</span>
+          </header>
+          <div class="gauge" id="riskGauge" role="img" aria-label="Risk gauge"></div>
+          <ul class="factor-list" id="riskFactors"></ul>
+        </article>
+
+        <article class="card health-card" aria-label="Financial health">
+          <header class="card-head">
+            <span class="kicker">Health</span>
+            <span class="badge tone-health" id="healthBadge">A+</span>
+          </header>
+          <div class="health-display">
+            <div class="health-letter" id="healthLetter">A+</div>
+            <div class="health-score"><span id="healthScoreNum">100</span><span class="muted">/100</span></div>
+          </div>
+          <ul class="factor-list" id="healthFactors"></ul>
+        </article>
+      </section>
+
+      <!-- SIMULATOR -->
+      <section class="card simulator" id="simulator" aria-label="Decision simulator">
+        <header class="card-head">
+          <div>
+            <span class="kicker">Simulate a decision</span>
+            <h2 class="card-title">What if you…</h2>
+          </div>
+          <span class="muted small">Projections never change saved data until you confirm.</span>
+        </header>
+
+        <div class="sim-presets" role="group" aria-label="Preset scenarios">
+          <button class="chip" data-preset="buy1499" type="button">Buy ₹1,499 subscription</button>
+          <button class="chip" data-preset="cancelSpotify" type="button">Cancel Spotify ₹119</button>
+          <button class="chip" data-preset="skipDinner" type="button">Skip tonight's dinner out</button>
+          <button class="chip" data-preset="freelance" type="button">Get freelance +₹3,000</button>
+          <button class="chip" data-preset="unexpected" type="button">Unexpected −₹2,000</button>
+          <button class="chip" data-preset="loan" type="button">Take ₹2,000 loan</button>
+        </div>
+
+        <div class="sim-form">
+          <label class="field">
+            <span class="field-label">Action</span>
+            <select id="simAction">
+              <option value="expense">Add one-time expense</option>
+              <option value="subscription">Add new monthly subscription</option>
+              <option value="cancelSubscription">Cancel a subscription</option>
+              <option value="skipExpense">Skip a planned expense (savings)</option>
+              <option value="income">Receive one-time income</option>
+              <option value="loan">Take a loan</option>
+              <option value="unexpected">Unexpected expense</option>
+            </select>
+          </label>
+          <label class="field">
+            <span class="field-label" id="simValueLabel">Amount (₹)</span>
+            <input id="simAmount" type="number" inputmode="numeric" min="0" placeholder="0" />
+          </label>
+          <label class="field" id="simSubField" hidden>
+            <span class="field-label">Pick subscription</span>
+            <select id="simSubscription"></select>
+          </label>
+        </div>
+
+        <div class="sim-actions">
+          <button class="btn primary" id="simPreviewBtn" type="button">Project impact</button>
+          <button class="btn ghost" id="simDiscardBtn" type="button" hidden>Discard</button>
+        </div>
+
+        <div id="simProjection" class="sim-projection" hidden>
+          <div class="verdict" id="simVerdict">
+            <span class="verdict-label" id="simVerdictLabel">Smart</span>
+            <span class="verdict-reason" id="simVerdictReason">—</span>
+          </div>
+          <div class="delta-grid" id="simDeltas"></div>
+          <div class="sim-forecast">
+            <canvas id="simForecastCanvas" width="640" height="220" aria-label="30-day forecast comparison"></canvas>
+            <div class="legend">
+              <span><i class="dot dot-current"></i> If you do nothing</span>
+              <span><i class="dot dot-projected"></i> If you do this</span>
+            </div>
+          </div>
+          <button class="btn primary" id="simConfirmBtn" type="button">Confirm &amp; apply</button>
+        </div>
+      </section>
+
+      <!-- TWO COLUMN -->
+      <section class="grid-two">
+        <article class="card" id="insights" aria-label="Coaching insights">
+          <header class="card-head">
+            <span class="kicker">Coaching</span>
+            <h2 class="card-title">What your numbers are saying</h2>
+          </header>
+          <ul class="insights" id="insightsList"></ul>
+        </article>
+
+        <article class="card" id="forecast" aria-label="Monthly forecast">
+          <header class="card-head">
+            <span class="kicker">30-day forecast</span>
+            <h2 class="card-title">Best · Expected · Worst</h2>
+          </header>
+          <div class="forecast-grid">
+            <div class="forecast-cell best">
+              <span class="muted small">Best case</span>
+              <span class="forecast-num">₹<span id="forecastBest">0</span></span>
+              <span class="muted small" id="forecastBestNote">—</span>
+            </div>
+            <div class="forecast-cell expected">
+              <span class="muted small">Expected</span>
+              <span class="forecast-num">₹<span id="forecastExpected">0</span></span>
+              <span class="muted small" id="forecastExpectedNote">—</span>
+            </div>
+            <div class="forecast-cell worst">
+              <span class="muted small">Worst case</span>
+              <span class="forecast-num">₹<span id="forecastWorst">0</span></span>
+              <span class="muted small" id="forecastWorstNote">—</span>
+            </div>
+          </div>
+          <canvas id="forecastCanvas" width="640" height="180" aria-label="30-day projection chart"></canvas>
+        </article>
+      </section>
+
+      <!-- TRANSACTIONS + HEATMAP -->
+      <section class="grid-two">
+        <article class="card" id="transactions" aria-label="Transactions">
+          <header class="card-head">
+            <span class="kicker">Transactions</span>
+            <h2 class="card-title">What you spent, where it went</h2>
+          </header>
+          <div class="list" id="txList"></div>
+        </article>
+
+        <article class="card" aria-label="Daily spending heatmap">
+          <header class="card-head">
+            <span class="kicker">Heatmap</span>
+            <h2 class="card-title">Daily spending intensity</h2>
+          </header>
+          <div class="heatmap" id="heatmap"></div>
+          <div class="legend">
+            <span class="muted small">Less</span>
+            <span class="heat-cell heat-0"></span>
+            <span class="heat-cell heat-1"></span>
+            <span class="heat-cell heat-2"></span>
+            <span class="heat-cell heat-3"></span>
+            <span class="heat-cell heat-4"></span>
+            <span class="muted small">More</span>
+          </div>
+        </article>
+      </section>
+
+      <!-- CATEGORY + BURN-DOWN -->
+      <section class="grid-two">
+        <article class="card" aria-label="Spending by category">
+          <header class="card-head">
+            <span class="kicker">Categories</span>
+            <h2 class="card-title">Where your money goes</h2>
+          </header>
+          <div class="donut-wrap">
+            <canvas id="categoryCanvas" width="240" height="240" aria-label="Spending by category"></canvas>
+            <ul class="legend-list" id="categoryLegend"></ul>
+          </div>
+        </article>
+
+        <article class="card" aria-label="Burn-down chart">
+          <header class="card-head">
+            <span class="kicker">Burn-down</span>
+            <h2 class="card-title">Balance over 30 days</h2>
+          </header>
+          <canvas id="burndownCanvas" width="640" height="220" aria-label="Balance over 30 days"></canvas>
+        </article>
+      </section>
+
+      <!-- SUBSCRIPTIONS -->
+      <section class="card" id="subscriptions" aria-label="Subscriptions">
+        <header class="card-head">
+          <div>
+            <span class="kicker">Subscriptions</span>
+            <h2 class="card-title">The recurring drag</h2>
+          </div>
+          <div class="actions">
+            <span class="muted small">Monthly <strong id="subMonthly">₹0</strong> · Annual <strong id="subAnnual">₹0</strong></span>
+            <button class="btn" id="addSubBtn" type="button">+ Add</button>
+          </div>
+        </header>
+        <div class="list" id="subList"></div>
+      </section>
+
+      <!-- COMMITMENTS -->
+      <section class="card" id="commitments" aria-label="Commitments">
+        <header class="card-head">
+          <div>
+            <span class="kicker">Commitments</span>
+            <h2 class="card-title">Bills &amp; EMIs you owe</h2>
+          </div>
+          <div class="actions">
+            <button class="btn" id="addCommitBtn" type="button">+ Add</button>
+          </div>
+        </header>
+        <div class="list" id="commitList"></div>
+      </section>
+
+      <!-- INCOME -->
+      <section class="card" id="income" aria-label="Income">
+        <header class="card-head">
+          <div>
+            <span class="kicker">Income</span>
+            <h2 class="card-title">What's coming in</h2>
+          </div>
+          <div class="actions">
+            <button class="btn" id="addRecurringIncomeBtn" type="button">+ Recurring</button>
+          </div>
+        </header>
+        <div class="list" id="incomeList"></div>
+        <p class="muted small">One-time income is added via the "+ Income" button above.</p>
+      </section>
+
+      <!-- GOALS -->
+      <section class="card" id="goals" aria-label="Savings goals">
+        <header class="card-head">
+          <div>
+            <span class="kicker">Goals</span>
+            <h2 class="card-title">What you're saving for</h2>
+          </div>
+          <div class="actions">
+            <button class="btn" id="addGoalBtn" type="button">+ Add</button>
+          </div>
+        </header>
+        <div class="grid-goals" id="goalsList"></div>
+      </section>
+
+      <!-- DEBTS -->
+      <section class="card" id="debts" aria-label="Debts and loans">
+        <header class="card-head">
+          <div>
+            <span class="kicker">Debts</span>
+            <h2 class="card-title">Loans &amp; repayment drag</h2>
+          </div>
+          <div class="actions">
+            <button class="btn" id="takeLoanBtn" type="button">+ Take loan</button>
+          </div>
+        </header>
+        <div class="list" id="debtList"></div>
+      </section>
+
+      <footer class="foot">
+        <span class="muted small">Paisa keeps your data locally in your browser. No backend, no tracking.</span>
+      </footer>
+    </section>
+  </main>
+
+  <!-- TOAST -->
+  <div class="toast-wrap" id="toastWrap" aria-live="polite"></div>
+
+  <!-- MODAL -->
+  <div class="modal-backdrop" id="modalBackdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <header><h3 id="modalTitle">Title</h3></header>
+      <div class="modal-body" id="modalBody"></div>
+      <footer class="modal-actions">
+        <button class="btn ghost" id="modalCancelBtn" type="button">Cancel</button>
+        <button class="btn primary" id="modalConfirmBtn" type="button">Confirm</button>
+      </footer>
+    </div>
+  </div>
+
+  <script type="module" src="app/main.js"></script>
+</body>
+</html>
